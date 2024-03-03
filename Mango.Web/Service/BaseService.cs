@@ -1,4 +1,4 @@
-﻿using Mango.Services.CouponAPI.Models.Dto;
+﻿
 using Mango.Web.Models;
 using Mango.Web.Service.IService;
 using Newtonsoft.Json;
@@ -69,7 +69,7 @@ namespace Mango.Web.Service
             }
             catch (Exception ex)
             {
-                var dto = new ResponseDto
+                var dto = new ResponseDto() 
                 {
                     IsSuccess = false,
                     Message = ex.Message

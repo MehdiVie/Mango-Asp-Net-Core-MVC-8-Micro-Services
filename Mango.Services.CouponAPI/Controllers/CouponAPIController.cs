@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Mango.Services.CouponAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/coupon")]
     [ApiController]
     public class CouponAPIController : ControllerBase
     {
@@ -21,15 +21,13 @@ namespace Mango.Services.CouponAPI.Controllers
             _mapper = mapper;
         }
 
-        
-
         [HttpGet]
         public ResponseDto Get()
         {
             try
             {
                 IEnumerable<Coupon> objList = _db.Coupons.ToList();
-                _response.Result = _mapper.Map<CouponDto>(objList); 
+                _response.Result = _mapper.Map<IEnumerable<CouponDto>>(objList); 
             }
             catch (Exception ex)
             {
@@ -48,7 +46,7 @@ namespace Mango.Services.CouponAPI.Controllers
             try
             {
                 Coupon obj = _db.Coupons.First(u => u.CouponId == id);
-                _response.Result= _mapper.Map<CouponDto>(obj); ;
+                _response.Result= _mapper.Map<CouponDto>(obj); 
             }
             catch (Exception ex)
             {
@@ -71,7 +69,7 @@ namespace Mango.Services.CouponAPI.Controllers
                     _response.IsSuccess=false;
                 }
 
-                _response.Result = _mapper.Map<CouponDto>(obj); ;
+                _response.Result = _mapper.Map<CouponDto>(obj); 
             }
             catch (Exception ex)
             {
@@ -91,7 +89,7 @@ namespace Mango.Services.CouponAPI.Controllers
                 _db.Coupons.Add(coupon);
                 _db.SaveChanges();
 
-                _response.Result = _mapper.Map<CouponDto>(obj); ;
+                _response.Result = _mapper.Map<CouponDto>(obj); 
             }
             catch (Exception ex)
             {
@@ -111,7 +109,7 @@ namespace Mango.Services.CouponAPI.Controllers
                 _db.Coupons.Update(coupon);
                 _db.SaveChanges();
 
-                _response.Result = _mapper.Map<CouponDto>(obj); ;
+                _response.Result = _mapper.Map<CouponDto>(obj); 
             }
             catch (Exception ex)
             {

@@ -1,4 +1,4 @@
-﻿using Mango.Services.CouponAPI.Models.Dto;
+﻿
 using Mango.Web.Models;
 
 namespace Mango.Web.Service.IService
