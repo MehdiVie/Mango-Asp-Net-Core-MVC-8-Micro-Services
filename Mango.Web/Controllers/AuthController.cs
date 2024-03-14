@@ -123,6 +123,7 @@ namespace Mango.Web.Controllers
                         obj.Role = SD.RoleCustomer;
                     }
 
+
                     assignRole = await _authService.AssignRoleAsync(obj);
 
                     if ((assignRole != null) && (assignRole.IsSuccess))
