@@ -2,6 +2,7 @@
 using Mango.Web.Models;
 using Mango.Web.Service.IService;
 using Newtonsoft.Json;
+using System;
 using System.Net;
 using System.Text;
 using static Mango.Web.Utility.SD;
@@ -26,17 +27,19 @@ namespace Mango.Web.Service
                 message.Headers.Add("Accept", "application/json");
                 //token
 
+
                 message.RequestUri = new Uri(requestDto.Url);
 
                 if (requestDto.Data != null)
                 {
                     message.Content = new StringContent(JsonConvert.SerializeObject(requestDto.Data), Encoding.UTF8, "application/json");
                 }
-
+                
                 if (withBearer)
                 {
                     var token = _tokenProvider.GetToken();
                     message.Headers.Add("Authorization", $"Bearer {token}");
+                    
                 }
 
                 switch (requestDto.ApiType)
@@ -57,7 +60,9 @@ namespace Mango.Web.Service
 
                 HttpResponseMessage? apiResponse = null;
 
+
                 apiResponse = await client.SendAsync(message);
+
 
                 switch (apiResponse.StatusCode)
                 {

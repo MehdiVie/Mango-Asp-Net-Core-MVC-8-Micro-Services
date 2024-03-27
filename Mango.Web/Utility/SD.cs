@@ -8,6 +8,8 @@
         public static string ProductAPIBase { get; set; }
 
         public static string ShoppingCardAPIBase { get; set; }
+
+        public static string OrderAPIBase { get; set; }
         public static string AuthAPIBase { get; set; }
 
         public const string RoleAdmin = "Admin";

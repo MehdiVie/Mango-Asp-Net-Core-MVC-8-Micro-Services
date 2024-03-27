@@ -3,17 +3,26 @@ using Mango.Web.Service.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Stripe;
+using Stripe.Checkout;
 using System.IdentityModel.Tokens.Jwt;
+using Mango.Services.OrderAPI.Models;
+using Mango.Services.OrderAPI.Data;
 
 namespace Mango.Web.Controllers
 {
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
-        
-        public CartController(ICartService cartService)
+        private readonly IOrderService _orderService;
+        private readonly AppDbContext _db;
+
+
+        public CartController(ICartService cartService, IOrderService orderService,AppDbContext db)
         {
             _cartService = cartService;
+            _orderService = orderService;
+            _db = db;
         }
 
         [Authorize]
@@ -22,6 +31,88 @@ namespace Mango.Web.Controllers
             return View(await CartInformationFromLoggedInUser());
         }
 
+        [Authorize]
+        public async Task<IActionResult> Checkout()
+        {
+            return View(await CartInformationFromLoggedInUser());
+        }
+
+        [Authorize]
+        [ActionName("Checkout")]
+        [HttpPost]
+        public async Task<IActionResult> Checkout(CartDto cartDto)
+        {
+            CartDto cart = await CartInformationFromLoggedInUser();
+            cart.CartHeader.Phone = cartDto.CartHeader.Phone;
+            cart.CartHeader.Email = cartDto.CartHeader.Email;
+            cart.CartHeader.Name = cartDto.CartHeader.Name;
+
+
+            var response = await _orderService.CreateOrder(cart);
+            OrderHeaderDto orderHeaderDto = JsonConvert.DeserializeObject<OrderHeaderDto>(Convert.ToString(response.Result));
+
+            if (response != null && response.IsSuccess)
+            {
+                //get stripe session and redirect to stripe to place order
+                //
+                var domain = Request.Scheme + "://" + Request.Host.Value + "/";
+
+                StripeRequestDto stripeRequestDto = new()
+                {
+                    ApprovedUrl = domain + "cart/Confirmation?orderId=" + orderHeaderDto.OrderHeaderId,
+                    CancelUrl = domain + "cart/checkout",
+                    OrderHeader = orderHeaderDto
+                };
+
+                //var stripeResponse = CreateStripeSession(stripeRequestDto);
+                //var stripeResponse = await _orderService.CreateStripeSession(stripeRequestDto);
+                //StripeRequestDto stripeResponseResult = JsonConvert.DeserializeObject<StripeRequestDto>
+                // (Convert.ToString(stripeResponse.Result));
+
+                var options = new SessionCreateOptions()
+                {
+                    SuccessUrl = stripeRequestDto.ApprovedUrl,
+                    CancelUrl = stripeRequestDto.CancelUrl,
+                    LineItems = new List<SessionLineItemOptions>(),
+                    Mode = "payment",
+
+                };
+
+
+                foreach (var item in stripeRequestDto.OrderHeader.OrderDetails)
+                {
+                    var sessionLineItem = new SessionLineItemOptions()
+                    {
+                        PriceData = new SessionLineItemPriceDataOptions()
+                        {
+                            UnitAmount = (long)(item.ProductPrice * 100), // $20.99 -> 2099
+                            Currency = "usd",
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = item.ProductName
+                            }
+                        },
+                        Quantity = item.Count
+                    };
+
+                    options.LineItems.Add(sessionLineItem);
+                }
+
+                var service = new SessionService();
+                Session session = service.Create(options);
+                stripeRequestDto.StripeSessionUrl = session.Url;
+
+                OrderHeader orderHeader = _db.OrderHeaders.Find(stripeRequestDto.OrderHeader.OrderHeaderId);
+
+                orderHeader.StripeSessionId = session.Id;
+                _db.SaveChanges();
+
+                Response.Headers.Add("Location", stripeRequestDto.StripeSessionUrl);
+                return new StatusCodeResult(303);
+
+            }
+            return View();
+        }
         private async Task<CartDto> CartInformationFromLoggedInUser()
         {
             string userID = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub)?.FirstOrDefault().Value;
@@ -108,6 +199,11 @@ namespace Mango.Web.Controllers
 
             return RedirectToAction(nameof(CartIndex));
 
+        }
+
+        public async Task<IActionResult> Confirmation(int orderId)
+        {
+            return View(orderId);
         }
     }
 }
