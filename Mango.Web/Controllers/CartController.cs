@@ -6,8 +6,12 @@ using Newtonsoft.Json;
 using Stripe;
 using Stripe.Checkout;
 using System.IdentityModel.Tokens.Jwt;
-using Mango.Services.OrderAPI.Models;
 using Mango.Services.OrderAPI.Data;
+using Mango.Web.Utility;
+using Mango.Services.OrderAPI.Models;
+using Mango.MessageBus;
+using Azure;
+
 
 namespace Mango.Web.Controllers
 {
@@ -15,13 +19,18 @@ namespace Mango.Web.Controllers
     {
         private readonly ICartService _cartService;
         private readonly IOrderService _orderService;
+        private readonly IConfiguration _configuration;
+        private readonly IMessageBus _messageBus;
         private readonly AppDbContext _db;
 
 
-        public CartController(ICartService cartService, IOrderService orderService,AppDbContext db)
+        public CartController(ICartService cartService, IOrderService orderService,AppDbContext db,
+            IConfiguration configuration,IMessageBus messageBus)
         {
             _cartService = cartService;
             _orderService = orderService;
+            _configuration = configuration;
+            _messageBus = messageBus;
             _db = db;
         }
 
@@ -78,6 +87,14 @@ namespace Mango.Web.Controllers
 
                 };
 
+                var DiscountsObj = new List<SessionDiscountOptions>()
+                {
+                    new SessionDiscountOptions()
+                    {
+                        Coupon = stripeRequestDto.OrderHeader.CouponCode
+                    }
+                };
+
 
                 foreach (var item in stripeRequestDto.OrderHeader.OrderDetails)
                 {
@@ -98,6 +115,11 @@ namespace Mango.Web.Controllers
                     options.LineItems.Add(sessionLineItem);
                 }
 
+                if (stripeRequestDto.OrderHeader.Discount > 0)
+                {
+                    options.Discounts = DiscountsObj;
+                }
+
                 var service = new SessionService();
                 Session session = service.Create(options);
                 stripeRequestDto.StripeSessionUrl = session.Url;
@@ -112,6 +134,52 @@ namespace Mango.Web.Controllers
 
             }
             return View();
+        }
+        [Authorize]
+        [ActionName("ValidateStripeSession")]
+        private async Task<string> ValidateStripeSessionAsync(int orderHeaderId)
+        {
+            
+            OrderHeader orderHeader = _db.OrderHeaders.First(u=>u.OrderHeaderId==orderHeaderId);
+            
+            var service = new SessionService();
+            Session session = service.Get(orderHeader.StripeSessionId);
+            
+            var paymentIntentService = new PaymentIntentService();
+            PaymentIntent paymentIntent = paymentIntentService.Get(session.PaymentIntentId);
+                
+            if (paymentIntent.Status == "succeeded")
+            {
+                orderHeader.PaymentIntentId= paymentIntent.Id;
+                orderHeader.Status = SD.Status_Approved;
+                _db.SaveChanges();
+
+                RewardDto rewardDto = new()
+                {
+                    OrderId = orderHeaderId,
+                    RewardsActivity = Convert.ToInt32(orderHeader.OrderTotal),
+                    UserId = orderHeader.UserId,
+                };
+                string topicName = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreatedTopic");
+                await _messageBus.PublishMessage(rewardDto,topicName);
+            }
+
+            return orderHeader.Status;
+
+        }
+        public async Task<IActionResult> Confirmation(int orderId)
+        {
+            
+            Task<string> task1 = ValidateStripeSessionAsync(orderId);
+            string orderHeaderStatus = task1.Result;
+
+            if (orderHeaderStatus == SD.Status_Approved)
+            {
+                return View(orderId);
+            }
+            //in error case
+            return View(0);
+
         }
         private async Task<CartDto> CartInformationFromLoggedInUser()
         {
@@ -201,9 +269,6 @@ namespace Mango.Web.Controllers
 
         }
 
-        public async Task<IActionResult> Confirmation(int orderId)
-        {
-            return View(orderId);
-        }
+
     }
 }

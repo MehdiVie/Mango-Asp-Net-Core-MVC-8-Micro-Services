@@ -1,3 +1,4 @@
+using Mango.MessageBus;
 using Mango.Services.OrderAPI.Data;
 using Mango.Web.Service;
 using Mango.Web.Service.IService;
@@ -25,6 +26,7 @@ builder.Services.AddHttpClient<IProductService, ProductService>();
 builder.Services.AddHttpClient<ICartService, CartService>();
 builder.Services.AddHttpClient<IOrderService, OrderService>();
 
+builder.Services.AddScoped<IMessageBus, MessageBus>();
 
 
 
