@@ -11,6 +11,7 @@ using Mango.Web.Utility;
 using Mango.Services.OrderAPI.Models;
 using Mango.MessageBus;
 using Azure;
+using System.Net;
 
 
 namespace Mango.Web.Controllers
@@ -62,6 +63,7 @@ namespace Mango.Web.Controllers
 
             if (response != null && response.IsSuccess)
             {
+
                 //get stripe session and redirect to stripe to place order
                 //
                 var domain = Request.Scheme + "://" + Request.Host.Value + "/";
@@ -119,6 +121,8 @@ namespace Mango.Web.Controllers
                 {
                     options.Discounts = DiscountsObj;
                 }
+
+
 
                 var service = new SessionService();
                 Session session = service.Create(options);

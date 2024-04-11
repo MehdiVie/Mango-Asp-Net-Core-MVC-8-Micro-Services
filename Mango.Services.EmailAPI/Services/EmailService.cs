@@ -67,7 +67,7 @@ namespace Mango.Services.EmailAPI.Services
         {
             string message = "New Order was placed successfully! <br/> " + rewardMessage.OrderId;
 
-            await LogAndEmail(message, "baraye.azadi.group@gmail.com");
+            await LogAndEmail(message, "info@mango.com");
         }
 
         public async Task RegisterUserEmailAndLog(string email)

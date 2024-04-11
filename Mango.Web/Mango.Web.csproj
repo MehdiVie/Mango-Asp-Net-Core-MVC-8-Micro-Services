@@ -4,12 +4,14 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	  <SelfContained>true</SelfContained>
+	  <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="IdentityModel" Version="6.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Stripe.net" Version="43.21.0-beta.1" />
+    <PackageReference Include="Stripe.net" Version="43.23.0-beta.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.4.0" />
 
   </ItemGroup>

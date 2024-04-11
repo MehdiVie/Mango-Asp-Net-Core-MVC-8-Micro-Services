@@ -61,48 +61,49 @@ namespace Mango.Web.Controllers
         public async Task<IActionResult> ProductEdit(int ProductId)
         {
 
-            ResponseDto? response = await _productService.GetProductByIdAsync(ProductId);
+                 ResponseDto? response = await _productService.GetProductByIdAsync(ProductId);
 
-            if ((response != null) && (response.IsSuccess))
-            {
+                if ((response != null) && (response.IsSuccess))
+                {
 
-                ProductDto? model = JsonConvert.DeserializeObject<ProductDto>(Convert.ToString(response.Result));
-                return View(model);
-            }
-            else
-            {
-                TempData["error"] = response?.Message;
-            }
-
+                    ProductDto? model = JsonConvert.DeserializeObject<ProductDto>(Convert.ToString(response.Result));
+                    return View(model);
+                }
+                else
+                {
+                    TempData["error"] = response?.Message;
+                }
+            
             return NotFound();
         }
         [HttpPost]
         public async Task<IActionResult> ProductEdit(ProductDto model)
         {
-
-            ResponseDto? response = await _productService.GetProductByIdAsync(model.ProductId);
-
-            if ((response != null) && (response.IsSuccess))
+            if (ModelState.IsValid)
             {
+                ResponseDto? response = await _productService.GetProductByIdAsync(model.ProductId);
 
-                var task = await _productService.UpdateProductAsync(model);
-
-                if (task.IsSuccess)
+                if ((response != null) && (response.IsSuccess))
                 {
-                    TempData["success"] = "Product updated successfully!";
+
+                    var task = await _productService.UpdateProductAsync(model);
+
+                    if (task.IsSuccess)
+                    {
+                        TempData["success"] = "Product updated successfully!";
+                    }
+                    else
+                    {
+                        TempData["error"] = task?.Message;
+                    }
+
+                    return RedirectToAction(nameof(ProductIndex), "Product");
                 }
                 else
                 {
-                    TempData["error"] = task?.Message;
+                    TempData["error"] = response?.Message;
                 }
-
-                return RedirectToAction(nameof(ProductIndex), "Product");
             }
-            else
-            {
-                TempData["error"] = response?.Message;
-            }
-
             return View(model);
         }
 
