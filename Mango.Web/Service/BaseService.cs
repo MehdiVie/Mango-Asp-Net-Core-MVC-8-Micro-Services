@@ -27,23 +27,16 @@ namespace Mango.Web.Service
                 HttpClient client = _httpClientFactory.CreateClient("MangoAPI");
                 
                 HttpRequestMessage message = new();
-                if(requestDto.ContentType==ContentType.MultipartFormData)
-                {
-					message.Headers.Add("Accept", "*/*");
-				}
-                else
-                {
-					message.Headers.Add("Accept", "application/json");
-				}
-                
+                message.Headers.Add("Accept", "application/json");
                 //token
+
 
                 message.RequestUri = new Uri(requestDto.Url);
 
 				if (requestDto.ContentType == ContentType.MultipartFormData)
 				{
                     var content =new MultipartFormDataContent();
-                    
+
                     foreach (var prop in requestDto.Data.GetType().GetProperties())
                     {
                         var value=prop.GetValue(requestDto.Data);
@@ -111,7 +104,7 @@ namespace Mango.Web.Service
                     case HttpStatusCode.Forbidden:
                         return new() { IsSuccess = false, Message = "Access Denied" };
                     case HttpStatusCode.InternalServerError:
-                        return new() { IsSuccess = false, Message = "Internal Server Error" };
+                        return new() { IsSuccess = false, Message = "Access Denied" };
                     default:
                         var apiResponseContent = await apiResponse.Content.ReadAsStringAsync();
                         var apiResponseDto = JsonConvert.DeserializeObject<ResponseDto>(apiResponseContent);
