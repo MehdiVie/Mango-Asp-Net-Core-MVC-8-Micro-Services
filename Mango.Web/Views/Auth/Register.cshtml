@@ -12,25 +12,40 @@
         </div>
         <div class="row">
             <div class="col-12 col-md-6  offset-md-3 pb-2">
+                <label asp-for="Email">Email<span class="text-danger">*</span></label>
                 <input asp-for="Email" type="email" class="form-control" placeholder="Email" />
                 <span asp-validation-for="Email"></span>
             </div>
             <div class="col-12 col-md-6  offset-md-3 pb-2">
+                <label for="ReEmail">ReType Email<span class="text-danger">*</span></label>
+                <input name="ReEmail" type="email" class="form-control" placeholder="ReType Email" />
+                <span asp-validation-for="ReEmail"></span>
+            </div>
+            <div class="col-12 col-md-6  offset-md-3 pb-2">
+                <label asp-for="Name">Name<span class="text-danger">*</span></label>
                 <input asp-for="Name" class="form-control" placeholder="Name" />
                 <span asp-validation-for="Name"></span>
             </div>
             <div class="col-12 col-md-6  offset-md-3 pb-2">
+                <label asp-for="PhoneNumber">PhoneNumber<span class="text-danger">*</span></label>
                 <input asp-for="PhoneNumber"  class="form-control" placeholder="PhoneNumber" />
                 <span asp-validation-for="PhoneNumber"></span>
             </div>
             <div class="col-12 col-md-6  offset-md-3 pb-2">
+                <label asp-for="Password">Password<span class="text-danger">*</span></label>
                 <input asp-for="Password" type="password" class="form-control" placeholder="Password" />
                 <span asp-validation-for="Password"></span>
             </div>
             <div class="col-12 col-md-6  offset-md-3 pb-2">
-                <select asp-for="Role" asp-items="@ViewBag.RoleList" class="form-select" >
-                    <option disabled selected>--Select Role--</option>
-                </select>
+                <label for="RePassword">ReType Password<span class="text-danger">*</span></label>
+                <input name="RePassword" type="password" class="form-control" placeholder="ReType Password" />
+                <span asp-validation-for="RePassword"></span>
+            </div>
+            <div class="col-12 col-md-6  offset-md-3 pb-2">
+                <!--<select asp-for="Role" asp-items="@ViewBag.RoleList" class="form-select" >
+                    
+                </select>-->
+                <input type="hidden" asp-for="Role" value="CUSTOMER" />
             </div>
             <div class="col-12 col-md-6 offset-md-3  pb-2">
                 <button type="submit" class="form-control btn btn-success">Register</button>

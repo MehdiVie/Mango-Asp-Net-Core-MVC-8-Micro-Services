@@ -99,7 +99,7 @@ namespace Mango.Web.Controllers
             var rolesList = new List<SelectListItem>
             {
                 new SelectListItem {Text=SD.RoleCustomer,Value=SD.RoleCustomer},
-                new SelectListItem {Text=SD.RoleAdmin,Value=SD.RoleAdmin}
+                //new SelectListItem {Text=SD.RoleAdmin,Value=SD.RoleAdmin}
             };
 
             ViewBag.RoleList = rolesList;   

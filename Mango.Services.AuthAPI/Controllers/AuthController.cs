@@ -17,7 +17,7 @@ namespace Mango.Services.AuthAPI.Controllers
         private readonly IMessageBus _messageBus;
         private readonly IConfiguration _configuration;
 
-        public AuthController(IAuthService authService,IMessageBus messageBus,IConfiguration configuration)
+        public AuthController(IAuthService authService, IMessageBus messageBus,IConfiguration configuration)
         {
             _authService = authService;
             _response = new();

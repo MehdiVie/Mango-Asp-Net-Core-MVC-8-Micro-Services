@@ -21,6 +21,10 @@
 
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Mango.Services.AuthAPI\Mango.Services.AuthAPI.csproj" />
+  </ItemGroup>
+
 
 
 </Project>

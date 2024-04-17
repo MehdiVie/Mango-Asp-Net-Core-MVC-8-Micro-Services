@@ -22,13 +22,17 @@ namespace Mango.Services.OrderAPI.Controllers
         private IMapper _mapper;
         private IProductService _productService;
         private IMessageBus _messageBus;
+        private IConfiguration _configuration;
 
-        public OrderAPIController(AppDbContext db, IMapper mapper, IProductService productService)
+        public OrderAPIController(AppDbContext db, IMapper mapper, IProductService productService,
+            IMessageBus messageBus,IConfiguration configuration)
         {
             _db = db;
             _response = new ResponseDto();
             _mapper = mapper;
             _productService = productService;
+            _messageBus= messageBus;
+            _configuration = configuration;
 
         }
         [Authorize]
